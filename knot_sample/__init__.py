@@ -1,4 +1,4 @@
-import os, sqlite3
+import os, bz2, sqlite3
 import spherogram, snappy
 
 def small_triangulation(manifold, tries=100):
@@ -24,33 +24,31 @@ class KnotDatabase:
         self.connection = sqlite3.connect(database_path)
         self.cursor = self.connection.cursor()
 
-    def knot(self, n):
-        self.cursor.execute('SELECT PD FROM knots WHERE crossings=?', (int(n),))
+    def _column_entry_for_knot(self, column, crossings):
+        self.cursor.execute('SELECT %s FROM knots WHERE crossings=%d' % (column, int(crossings)))
         ans = self.cursor.fetchone()
         if ans is None:
-            raise ValueError('No knot with %d crossings in database' % n)
-        else:
-            return spherogram.Link(eval(ans[0]))
+            raise ValueError('No knot with %d crossings in database' % crossings)
+        return ans[0]
 
-    def exterior(self, n):
+
+    def knot(self, crossings):
+        PD = self._column_entry_for_knot('PD', crossings)
+        return spherogram.Link(eval(PD))
+
+    def exterior(self, crossings):
         """
         Return a simplified triangulation of the exterior of the database knot
         with n crossings.  Everytime a triangulation is generated, it is saved
         to disk so that future calls will always yield the same triangulation.
         """
-        K = self.knot(n)
-        triangulation_file = __path__[0] + '/exteriors/%d.tri' % n
-        if os.path.exists(triangulation_file):
-            M = snappy.Manifold(triangulation_file)
-        else:
-            M = small_triangulation_of_exterior(K)
-            M.save(triangulation_file)
-        return M
+        tri_blob = self._column_entry_for_knot('triangulation', crossings)
+        return snappy.Manifold(bz2.decompress(tri_blob))
 
     def available(self):
         return [a[0] for a in self.cursor.execute('SELECT crossings FROM knots').fetchall()]
 
-
-knot_db = KnotDatabase(__path__[0] + '/knots.sqlite')
+module_path = os.path.dirname(__file__)
+knot_db = KnotDatabase(module_path + '/knots.sqlite')
 knot = knot_db.knot
 exterior = knot_db.exterior

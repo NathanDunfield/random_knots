@@ -43,6 +43,8 @@ class KnotDatabase:
         to disk so that future calls will always yield the same triangulation.
         """
         tri_blob = self._column_entry_for_knot('triangulation', crossings)
+        if tri_blob == None:
+            raise ValueError('Triangulation for %d crossings is not known' % crossings)
         return snappy.Manifold(bz2.decompress(tri_blob))
 
     def available(self):

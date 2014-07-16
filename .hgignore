@@ -1,0 +1,8 @@
+.dropbox
+.DS_Store
+References 
+Icon
+
+syntax: glob
+
+*.pyc

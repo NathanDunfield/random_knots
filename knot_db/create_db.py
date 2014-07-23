@@ -8,7 +8,7 @@ CREATE TABLE initial_knots (
  id integer primary key auto_increment,
  crossings integer,
  tetrahedra integer,
- tetrahedra_time integer, 
+ tetrahedra_time float, 
  volume float,
  volume_time float, 
  chern_simons float,

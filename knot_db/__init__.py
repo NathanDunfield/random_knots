@@ -33,4 +33,10 @@ class KnotDatabase:
         self.update_entry(crossings, column, ans)
         timer_column = column + '_time'
         if timer_column in self.columns:
-            self.update_entry(crossings, timer_column, time_elapsed)    
+            self.update_entry(crossings, timer_column, time_elapsed)
+
+def dataframe():
+    import pandas
+    KD = KnotDatabase()
+    return pandas.read_sql("SELECT * FROM random_knots.initial_knots", KD.connection)
+    

@@ -15,8 +15,11 @@ KD = knot_db.KnotDatabase()
 def tetrahedra(manifold):
     return manifold.num_tetrahedra()
 
+def volume(manifold):
+    return manifold.volume()
+
 def run_line(line):
-    KD.compute_entry(int(line), 'tetrahedra', tetrahedra)
+    KD.compute_entry(int(line), 'volumn', volume)
     return line, True
     
 T = taskdb.TaskDatabase('exteriors')

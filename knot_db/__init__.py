@@ -51,5 +51,8 @@ class KnotDatabase:
 def dataframe():
     import pandas
     KD = KnotDatabase()
-    return pandas.read_sql("SELECT * FROM random_knots.initial_knots", KD.connection)
+    dataframe = pandas.read_sql("SELECT * FROM random_knots.initial_knots", KD.connection)
+    # remove any empty columns
+    return dataframe.dropna(axis='columns', how='all')
+        
     

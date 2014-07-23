@@ -36,16 +36,28 @@ class KnotDatabase:
         if timer_column in self.columns:
             self.update_entry(crossings, timer_column, time_elapsed)
 
+    def store_polynomial(self, name, crossings, poly, time_elapsed):
+        self.update_entry(crossings, name, repr(poly).replace(' ', ''))
+        self.update_entry(crossings, name + '_time', time_elapsed)
+        self.update_entry(crossings, name + '_genus_bound', poly.degree()/2)
+        self.update_entry(crossings, name + '_monic', poly.is_monic())
+
     def compute_alexander(self, crossings):
         start_time = time.time()
         X = knot_sample.exterior(crossings)
         poly = alexander_polynomial(X, try_hard_to_shorten_relators=False)
-        ans = repr(poly).replace(' ', '')
         time_elapsed = time.time() - start_time
-        self.update_entry(crossings, 'alexander', ans)
-        self.update_entry(crossings, 'alexander_time', time_elapsed)
-        self.update_entry(crossings, 'alexander_genus_bound', poly.degree()/2)
-        self.update_entry(crossings, 'alexander_monic', poly.is_monic())
+        self.store_polynomial('alexander', crossings, poly, time_elapsed)
+
+    def compute_alexander_magma(self, crossings):
+        import alexander
+        start_time = time.time()
+        X = knot_sample.exterior(crossings)
+        poly = alexander.magma(X)
+        time_elapsed = time.time() - start_time
+        self.store_polynomial('alexander_magma', crossings, poly, time_elapsed)
+        
+
         
 
 def dataframe():

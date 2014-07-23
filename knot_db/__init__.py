@@ -1,5 +1,6 @@
 import MySQLdb, os, sys, re, time, random
 import knot_sample
+from snappy.snap import alexander_polynomial
 
 host = 'nmd.math.illinois.edu'
 user = '3mflds4ever'
@@ -34,6 +35,18 @@ class KnotDatabase:
         timer_column = column + '_time'
         if timer_column in self.columns:
             self.update_entry(crossings, timer_column, time_elapsed)
+
+    def compute_alexander(self, crossings):
+        start_time = time.time()
+        X = knot_sample.exterior(crossings)
+        poly = alexander_polynomial(X, try_hard_to_shorten_relators=False)
+        ans = repr(poly).replace(' ', '')
+        time_elapsed = time.time() - start_time
+        self.update_entry(crossings, 'alexander', ans)
+        self.update_entry(crossings, 'alexander_time', time_elapsed)
+        self.update_entry(crossings, 'alexander_genus_bound', poly.degree()/2)
+        self.update_entry(crossings, 'alexander_monic', poly.is_monic())
+        
 
 def dataframe():
     import pandas

@@ -18,8 +18,11 @@ def tetrahedra(manifold):
 def volume(manifold):
     return manifold.volume()
 
+def chern_simons(manifold):
+    return manifold.chern_simons()
+
 def run_line(line):
-    KD.compute_entry(int(line), 'volumn', volume)
+    KD.compute_entry(int(line), 'chern_simons', chern_simons)
     return line, True
     
 T = taskdb.TaskDatabase('exteriors')

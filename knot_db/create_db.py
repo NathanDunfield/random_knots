@@ -28,14 +28,28 @@ CREATE TABLE initial_knots (
  genus_upper_bound_time float
  )"""
 
-def make_database():
+def connect_to_db(create=False):
     conn = MySQLdb.connect(host=host, user='root', passwd=root_password)
     cur = conn.cursor()
-    cur.execute('DROP DATABASE random_knots')
-    cur.execute('CREATE DATABASE random_knots')
-    cur.execute('USE random_knots')
-    cur.execute(knotdb_schema)
+    if create:
+        #cur.execute('DROP DATABASE random_knots')
+        cur.execute('CREATE DATABASE random_knots')
+        cur.execute('USE random_knots')
+        cur.execute(knotdb_schema)
+    else:
+        cur.execute('USE random_knots')
+    return conn, cur
+    
+
+def make_database():
+    conn, cur = connect_to_db(create=True)
     for c in range(3, 1001):
         cur.execute('INSERT INTO initial_knots (crossings) VALUES (%s)', [c])
     for column in ['id', 'crossings', 'tetrahedra', 'volume']:
         cur.execute('ALTER TABLE initial_knots ADD INDEX (' + column +  ')')
+
+def add_column(column, datatype):
+    conn, cur =  connect_to_db()
+    cur.execute('ALTER TABLE initial_knots ADD ' + column + ' ' + datatype)
+    conn.commit()
+

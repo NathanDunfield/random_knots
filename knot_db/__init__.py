@@ -1,6 +1,7 @@
 import MySQLdb, os, sys, re, time, random
 import knot_sample
 from snappy.snap import alexander_polynomial
+from sage.all import ZZ, PolynomialRing
 
 host = 'nmd.math.illinois.edu'
 user = '3mflds4ever'
@@ -58,13 +59,20 @@ class KnotDatabase:
         self.store_polynomial('alexander_magma', crossings, poly, time_elapsed)
         
 
-        
+def eval_poly_column(dataframe, col_name):
+    R = PolynomialRing(ZZ, 'a')
+    def eval_poly(p):
+        return None if p is None else R(p)
+    dataframe[col_name] = map(eval_poly, dataframe[col_name])
 
 def dataframe():
     import pandas
     KD = KnotDatabase()
     dataframe = pandas.read_sql("SELECT * FROM random_knots.initial_knots", KD.connection)
-    # remove any empty columns
-    return dataframe.dropna(axis='columns', how='all')
+    for column in ['alexander', 'alexander_magma']:
+        eval_poly_column(dataframe, column)
+    # remove any completely empty columns
+    dataframe = dataframe.dropna(axis='columns', how='all')
+    return dataframe
         
     

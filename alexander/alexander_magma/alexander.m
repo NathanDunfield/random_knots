@@ -31,15 +31,15 @@ Fold := function(f, L)
 end function;
 
 Total := function(L)
-   return  #L gt 0 select Fold(function(x,y) return x + y; end function, L) else 0;     
+   return  #L gt 0 select &+L else 0;     
 end function;
 
 Product := function(L)
-   return  #L gt 0 select Fold(function(x,y) return x *y; end function, L) else 1;      
+   return  #L gt 0 select &*L else 1;      
 end function;
 
 Concatenation := function(L)
-   return #L gt 0 select Fold(function(x,y) return x cat y; end function, L) else [];
+   return #L gt 0 select &cat L else [];
 end function;
 
 Last := function(L)
@@ -106,21 +106,27 @@ W should be in Eltseq form, e.g. x*y*X*Y -> [1,2,-1,-2]
 
 */
 
-GetGroupGen := function(G, i)
-    return i gt 0 select G.i else (G.(Abs(i)))^-1;
+FoxSetup := function(G, R, phi, var)
+    gen_ims := AssociativeArray();
+    fox := AssociativeArray();
+    for i in [1..#Generators(G)] do
+	gen_ims[i] := R ! phi(G.i);
+	gen_ims[-i] := R ! phi(G.i^-1);
+	fox[i] := Zero(R);
+        fox[-i] := Zero(R);
+    end for;
+    fox[var] := One(R);
+    fox[-var] := -gen_ims[-var];
+    return gen_ims, fox;
 end function;
 
-forward FoxDerivative;
-
 FoxDerivative := function(G, R, W, phi, var)
-    if #W eq 0 then return Zero(R); end if;
-    w := W[1];
-    if w gt 0 then 
-        initterm := w ne var select Zero(R) else One(R);
-    else 
-        initterm :=   w ne -var select Zero(R) else -(R ! phi(G.var^-1));
-    end if;
-    return initterm + phi(GetGroupGen(G, w)) * FoxDerivative(G, R, TailSeq(W), phi, var);
+    ans := Zero(R);
+    gen_ims, fox:= FoxSetup(G, R, phi, var);
+    for w in Reverse(W) do 
+	ans := fox[w] + gen_ims[w]*ans;
+    end for; 
+    return ans;
 end function;
 
 /* 
@@ -197,8 +203,8 @@ intrinsic AlexanderPolynomialOfHomomorphism(G::GrpFP, A::GrpAb, phi::Map)
    P := PolynomialRing(Integers(), #Generators(A));
    s := #Generators(G);
    rels := [ Eltseq(LHS(r) * RHS(r)^-1) : r in Relations(G)];
-  M := GroupRingMatrixToPolyMatrix(
-      Matrix( [[FoxDerivative(G, R, r, phi, var)  : r in rels] : var in [1..s]]), P);
+   foxes :=  [[FoxDerivative(G, R, r, phi, var)  : r in rels] : var in [1..s]];
+   M := GroupRingMatrixToPolyMatrix(Matrix(foxes), P);
    minors := Minors( M, s - 1);
    alex := GCD(minors);
    return NormalizePolynomialByLaurantUnits(alex), P, phi;
@@ -226,8 +232,6 @@ specified by lists [phi_j(G.i)].  The main function below constructs an
 explicit homomorphism 
 
    G -> A
-
-which is phi = (phi_1,...,phi_j)
 
 */
 

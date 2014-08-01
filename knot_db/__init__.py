@@ -57,6 +57,14 @@ class KnotDatabase:
         poly = alexander.magma(X)
         time_elapsed = time.time() - start_time
         self.store_polynomial('alexander_magma', crossings, poly, time_elapsed)
+
+    def clear_column(self, col_name):
+        self.execute_and_commit('UPDATE initial_knots SET ' + col_name + '=NULL')
+
+    def clear_matching_columns(self, col_name_prefix):
+        for column in self.columns:
+            if column.startswith(col_name_prefix):
+                self.clear_column(column)
         
 
 def eval_poly_column(dataframe, col_name):

@@ -27,10 +27,10 @@ class KnotDatabase:
         command  = 'UPDATE initial_knots SET ' + column + '=%s where crossings=%s'
         self.execute_and_commit(command, [entry, crossings])
 
-    def compute_entry(self, crossings, column, function, knot_or_exterior='exterior'):
+    def compute_entry(self, crossings, column, function, knot_or_exterior='exterior', **kwargs):
         start_time = time.time()
         X = getattr(knot_sample, knot_or_exterior)(crossings)
-        ans = function(X)
+        ans = function(X, **kwargs)
         time_elapsed = time.time() - start_time
         self.update_entry(crossings, column, ans)
         timer_column = column + '_time'
@@ -65,6 +65,10 @@ class KnotDatabase:
         for column in self.columns:
             if column.startswith(col_name_prefix):
                 self.clear_column(column)
+
+    def get_entry(self, crossings, column):
+        self.cursor.execute('SELECT ' + column + ' FROM initial_knots WHERE crossings=%d' %crossings)
+        return self.cursor.fetchone()[0]
         
 
 def eval_poly_column(dataframe, col_name):

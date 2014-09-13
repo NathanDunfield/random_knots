@@ -22,7 +22,7 @@ def chern_simons(manifold):
     return manifold.chern_simons()
 
 def bridge(knot):
-    return knot.morse_index()
+    return knot.morse_number(solver='Gurobi')
 
 def run_line(line):
     KD.compute_entry(int(line), 'bridge_number', bridge, 'knot')

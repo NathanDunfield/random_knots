@@ -1,6 +1,6 @@
 #! /bin/env sage-python
 #
-#SBATCH --partition e
+#SBATCH --partition m
 #SBATCH --tasks=1
 #SBATCH --mem-per-cpu=4096
 #SBATCH --nice=10000

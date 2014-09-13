@@ -23,5 +23,5 @@ def run_line(line):
     ans = KD.get_entry(crossings, 'genus_upper_bound')
     return line, lower == ans
     
-#T = taskdb.TaskDatabase('genus')
-#T.run_function(run_line, num_tasks=1)
+T = taskdb.TaskDatabase('genus')
+T.run_function(run_line, num_tasks=1)

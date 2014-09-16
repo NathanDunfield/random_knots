@@ -2,10 +2,25 @@ import snappy
 import snappy.snap.t3mlite as t3m
 from snappy.snap.t3mlite.simplex import *
 from sage.all import matrix, cached_method, ZZ, ChainComplex
-import surface
+import surface, optimize
+
+def euler_to_genus(euler):
+    """
+    Given:
+
+    * M = complement of a null-homologous knot in a QHS
+    * euler = euler of some surface S which is nontrivial in H_2(M, bdry M)
+
+    returns an *upper* bound on the genus of the knot.
+
+    The reason we can't just solve (1 - 2g = euler) is that S may have nugatory
+    boundary components which bound discs in the torus (bdry M). 
+    """
+    if euler % 2 == 0:
+        euler += 1  # At least one nugagory component of (bdry S).
+    return (1 - euler)/2
 
 #----------- Boundary maps in homology for an Mcomplex ------------------
-
 
 def boundary_three(manifold):
     F, T = len(manifold.Faces), len(manifold.Tetrahedra) 
@@ -47,7 +62,7 @@ def boundary_maps(manifold):
     underlying cell-complex of a Mcomplex.
 
     >>> M = Mcomplex('o9_12345')
-    >>> len(M) == 3
+    >>> len(M.boundary_maps()) == 3
     True
     """
     B1, B2, B3 = boundary_one(manifold), boundary_two(manifold), boundary_three(manifold)
@@ -87,27 +102,28 @@ class Mcomplex(t3m.Mcomplex):
             raise ValueError("Homology group is not Z")
         return gens[0]
 
+    @cached_method
+    def optimal_generator_of_H2(self):
+        """
+        Returns a cycle of minimal l^1 norm representing the
+        generator of H_2.
+
+        >>> M = Mcomplex('K14n2134')
+        >>> M.optimal_generator_of_H2().norm(1)
+        14
+        """
+        gen = self.generator_of_H2()
+        return optimize.optimal_chain(gen, self.B3())
+
     def genus(self,  two_cycle=None):
         if two_cycle is None:
             two_cycle = self.generator_of_H2()
-        T = surface.cusp_torus(self, two_cycle)
-        z = surface.OneCycle(T, [e.weight for e in T.edges])
-        for i in range(100):
-            discs = len( [c for c in z.components() if c.is_zero_in_homology()] )
-            print discs
-        print 1
         norm =  two_cycle.norm(1)
         assert norm % 2 == 0 
-        euler = discs - norm/2
-        assert (1 - euler) % 2 == 0
-        return (1 - euler)/2
-    
-
+        euler = -norm/2
+        return euler_to_genus(euler)
+        
 if __name__ == '__main__':
-    #import doctest
-    #doctest.testmod()
-    M = t3m.Mcomplex('o9_12345')
-    M.generator_of_H2()
-    
-    
+    import doctest
+    doctest.testmod()
 

@@ -1,4 +1,11 @@
+"""
+Oriented surfaces realized as Hatcher-style Delta-complexes, that is,
+unions of (oriented) triangles without the constraint that a triangle
+is determined by its vertices.
+"""
+
 from sage.all import vector, matrix, ZZ, cached_method, ChainComplex
+from collections import OrderedDict
 
 class Triangle:
     """
@@ -178,7 +185,7 @@ class Surface:
         Build the 0 skeleton.
         """
         vertices = []
-        corners = dict( [ [(T, v), Corner(T, v)] for T in self.triangles for v in range(3) ] ) 
+        corners = OrderedDict( [ [(T, v), Corner(T, v)] for T in self.triangles for v in range(3) ] ) 
         while corners:
             C0 = corners.itervalues().next()
             vertex = [C0]
@@ -195,7 +202,7 @@ class Surface:
             vertices.append(V)
 
         self.vertices = vertices
-        self._vertex_containing_corner = dict([( (C.triangle, C.vertex), V) for V in vertices for C in V.corners])
+        self._vertex_containing_corner = OrderedDict([( (C.triangle, C.vertex), V) for V in vertices for C in V.corners])
 
     def build(self):
         """
@@ -307,7 +314,6 @@ class OneCycleSegment:
 class OneCycle:
     def __init__(self, surface, weights):
         self.surface, self.weights = surface, weights
-        print self.weights, type(self.weights)
         self.check_boundary_is_zero()
 
     def check_boundary_is_zero(self):
@@ -322,17 +328,19 @@ class OneCycle:
         """
         Returns a list of the connected components of the multicurve
         corresponding to the 1-cycle, each given as a OneCycle.
+
+        BOGUS: THIS IS ONLY ONE OF MANY POSSIBLE RESOLUTIONS
+        OF THE 1-CYCLE
         """
+        raise NotImplementedError("Not well defined")
         S, W = self.surface, self.weights
         support = [i for i, w in enumerate(W) if w != 0]
-        print "support", support
-        segments = {}
+        segments = OrderedDict()
         for i in support:
             E =S.edges[i]
             w = self.weights[i]
             o = 1 if w > 0 else -1
             segments[i] = [OneCycleSegment(E, o, a) for a in range(abs(w))]
-        print "segments", segments
 
         for V in S.vertices:
             segs_at_vertex = []   # a cyclically ordered list of arcs of the multicurve
@@ -349,16 +357,14 @@ class OneCycle:
 
             assert sum([s[0] for s in segs_at_vertex]) == 0
 
-            print "sav", segs_at_vertex
             while segs_at_vertex:
-                s0, s1 = first_pair_differing_in_first_component( segs_at_vertex )
-                print "s0, s1", s0, s1
+                s0, s1 = first_pair_differing_in_first_component(segs_at_vertex )
                 # want s0 to be incoming, s1 outgoing.  
                 if s0[0] > 0:
                     s0, s1 = s1, s0
                 s0[1].next, s1[1].prev = s1[1], s0[1]
                 segs_at_vertex.remove(s0), segs_at_vertex.remove(s1)
-
+            
         components = segments_into_components(  sum( segments.values(), [] ) )
         return [component_to_cycle(S, c) for c in components]
 

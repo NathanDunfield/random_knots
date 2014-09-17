@@ -8,6 +8,6 @@ def example(crossings):
     M = knot_sample.exterior(crossings)
     return homology.Mcomplex(M)
 
-for i in range(100):
-    M = example(5)
-    print M.genus()
+def test(crossings):
+    M = example(crossings)
+    return M.genus()

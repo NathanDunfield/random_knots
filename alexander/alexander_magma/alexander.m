@@ -20,6 +20,9 @@ x^8*y^2 + x^7*y^3 + x^6*y^4 + x^6*y^2 + x^6*y + x^5*y^3 + x^5*y^2 + x^4*y^4 + x^
 
 */
 
+BaseRing := Integers(); 
+// BaseRing := FiniteField(31991);
+
 /* Generic function programming goodness */
 
 FoldList := function(f, L)
@@ -138,8 +141,8 @@ insead of just taking A := Image(phi).
 */
 
 BasicAlexanderPolynomialOfHomomorphism := function(G, A, phi)
-   R := GroupAlgebra(Integers(), A);
-   P := PolynomialRing(Integers(), #Generators(A));
+   R := GroupAlgebra(BaseRing, A);
+   P := PolynomialRing(BaseRing, #Generators(A));
    s := #Generators(G);
    rels := [ Eltseq(LHS(r) * RHS(r)^-1) : r in Relations(G)];
   M := Matrix( [[FoxDerivative(G, R, r, phi, var)  : r in rels] : var in [1..s]]);
@@ -199,8 +202,8 @@ intrinsic AlexanderPolynomialOfHomomorphism(G::GrpFP, A::GrpAb, phi::Map)
      -> RngMPolElt, RngMPol, Map
 {The alexander polynomial of G with respect to the homomorphism phi: G -> A}
 
-   R := GroupAlgebra(Integers(), A);
-   P := PolynomialRing(Integers(), #Generators(A));
+   R := GroupAlgebra(BaseRing, A);
+   P := PolynomialRing(BaseRing, #Generators(A));
    s := #Generators(G);
    rels := [ Eltseq(LHS(r) * RHS(r)^-1) : r in Relations(G)];
    foxes :=  [[FoxDerivative(G, R, r, phi, var)  : r in rels] : var in [1..s]];

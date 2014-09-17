@@ -2,7 +2,7 @@ import snappy
 import snappy.snap.t3mlite as t3m
 from snappy.snap.t3mlite.simplex import *
 from sage.all import matrix, cached_method, ZZ, ChainComplex
-import surface, optimize
+from . import optimize
 
 def euler_to_genus(euler):
     """
@@ -117,7 +117,7 @@ class Mcomplex(t3m.Mcomplex):
 
     def genus(self,  two_cycle=None):
         if two_cycle is None:
-            two_cycle = self.generator_of_H2()
+            two_cycle = self.optimal_generator_of_H2()
         norm =  two_cycle.norm(1)
         assert norm % 2 == 0 
         euler = -norm/2

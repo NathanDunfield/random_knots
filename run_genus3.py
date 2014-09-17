@@ -11,6 +11,10 @@
 import taskdb
 import knot_db
 import knotgenus3
+import sys
+sys.setrecursionlimit(10000)
+
+
 KD = knot_db.KnotDatabase()
 
 def create_taskdb(name):
@@ -20,15 +24,17 @@ def create_taskdb(name):
     da.to_csv('/tmp/' + name, sep='\t', columns=['crossings','genus_lower_bound'], header=False, index=False)
 
 def upper_bound(M, lower_bound=0):
+    for i in range(100):
+        M.randomize()
     return knotgenus3.genus_upper_bound(M)
 
 def run_line(line):
     crossings, lower = map(int, line.split('\t'))
     KD.compute_entry(crossings, 'genus_upper_bound', upper_bound, lower_bound=lower)
     ans = KD.get_entry(crossings, 'genus_upper_bound')
-    return line, True   #lower == ans
+    return line, lower == ans
     
-T = taskdb.TaskDatabase('genus3')
+T = taskdb.TaskDatabase('genus4')
 T.run_function(run_line, num_tasks=1)
 
-#create_taskdb('genus3')
+#create_taskdb('genus4')

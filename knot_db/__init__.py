@@ -1,6 +1,5 @@
 import MySQLdb, os, sys, re, time, random
 import knot_sample
-from snappy.snap import alexander_polynomial
 from sage.all import ZZ, PolynomialRing
 
 host = 'nmd.math.illinois.edu'
@@ -46,7 +45,7 @@ class KnotDatabase:
     def compute_alexander(self, crossings):
         start_time = time.time()
         X = knot_sample.exterior(crossings)
-        poly = alexander_polynomial(X, try_hard_to_shorten_relators=False)
+        poly = X.alexander_polynomial(X, try_hard_to_shorten_relators=False)
         time_elapsed = time.time() - start_time
         self.store_polynomial('alexander', crossings, poly, time_elapsed)
 
@@ -57,6 +56,14 @@ class KnotDatabase:
         poly = alexander.magma(X)
         time_elapsed = time.time() - start_time
         self.store_polynomial('alexander_magma', crossings, poly, time_elapsed)
+
+    def compute_alexander_dror(self, crossings):
+        import alexander
+        start_time = time.time()
+        X = knot_sample.knot(crossings)
+        poly = alexander.dror(X)
+        time_elapsed = time.time() - start_time
+        self.store_polynomial('alexander_dror', crossings, poly, time_elapsed)
 
     def clear_column(self, col_name):
         self.execute_and_commit('UPDATE initial_knots SET ' + col_name + '=NULL')
@@ -81,7 +88,7 @@ def dataframe():
     import pandas
     KD = KnotDatabase()
     dataframe = pandas.read_sql("SELECT * FROM random_knots.initial_knots", KD.connection)
-    for column in ['alexander', 'alexander_magma']:
+    for column in ['alexander', 'alexander_magma', 'alexander_dror']:
         eval_poly_column(dataframe, column)
     # remove any completely empty columns
     dataframe = dataframe.dropna(axis='columns', how='all')

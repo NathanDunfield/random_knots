@@ -3,6 +3,11 @@
 References 
 Icon
 slurm_out
+knot_databases
+talk
+petal_diagram
+old/Data/
+knot_sample/knot_database.bz2
 
 syntax: glob
 

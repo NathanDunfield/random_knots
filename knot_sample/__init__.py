@@ -1,5 +1,4 @@
-import os, bz2, sqlite3
-import spherogram, snappy
+import spherogram, snappy, os, sqlite3, bz2
 
 def small_triangulation(manifold, tries=100):
     M = manifold.without_hyperbolic_structure()
@@ -39,8 +38,7 @@ class KnotDatabase:
     def exterior(self, crossings):
         """
         Return a simplified triangulation of the exterior of the database knot
-        with n crossings.  Everytime a triangulation is generated, it is saved
-        to disk so that future calls will always yield the same triangulation.
+        with n crossings. 
         """
         tri_blob = self._column_entry_for_knot('triangulation', crossings)
         if tri_blob == None:

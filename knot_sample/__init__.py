@@ -1,3 +1,14 @@
+"""
+
+>>> import knot_sample
+>>> knot_sample.knot(100)
+<Link: 1 comp; 100 cross>
+>>> E = knot_sample.exterior(100)
+>>> E.num_tetrahedra()                                                                                  213
+
+"""
+
+
 import spherogram, snappy, os, sqlite3, bz2
 
 def small_triangulation(manifold, tries=100):
@@ -38,7 +49,7 @@ class KnotDatabase:
     def exterior(self, crossings):
         """
         Return a simplified triangulation of the exterior of the database knot
-        with n crossings. 
+        with n crossings.
         """
         tri_blob = self._column_entry_for_knot('triangulation', crossings)
         if tri_blob == None:
